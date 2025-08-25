@@ -13,3 +13,39 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id             String          @id @default(uuid())
+  username       String          @unique
+  password       String
+  email          String          @unique
+  profileImgUrl  String?
+  chatRoomLinks  ChatRoomUser[]
+  friends        UserFriend[]
+  friendRequests FriendRequest[]
+}
+
+model UserFriend {
+  id     String @id @default(uuid())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+}
+
+model FriendRequest {
+  id               String @id @default(uuid())
+  requestingUser   User   @relation(fields: [requestingUserId], references: [id], onDelete: Cascade)
+  requestingUserId String
+}
+
+model ChatRoom {
+  id    String         @id @default(uuid())
+  users ChatRoomUser[]
+}
+
+model ChatRoomUser {
+  id         String   @id @default(uuid())
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+  chatRoomId String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+}
