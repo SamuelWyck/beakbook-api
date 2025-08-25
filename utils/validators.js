@@ -1,0 +1,62 @@
+const {body} = require("express-validator");
+const db = require("../db/querys.js");
+
+
+
+async function isUniqueEmail(email) {
+    const user = await db.findUniqueUser({
+        where: {
+            email: email
+        }
+    });
+    if (user) {
+        throw new Error("Email taken");
+    }
+
+    return true;
+};
+
+
+async function isUniqueUsername(username) {
+    const user = await db.findUniqueUser({
+        where: {
+            username: username
+        }
+    });
+    if (user) {
+        throw new Error("Username taken");
+    }
+
+    return true;
+};
+
+
+function passwordsMatch(confirmPwd, {req}) {
+    return confirmPwd === req.body.password;
+};
+
+
+
+const signupVal = [
+    body("email").trim()
+        .notEmpty().withMessage("Email required")
+        .isEmail().withMessage("Invalid email")
+        .custom(isUniqueEmail).withMessage("Email must be unique"),
+    body("username").trim()
+        .notEmpty().withMessage("Username required")
+        .isLength({max: 100}).withMessage("Username must be less than 100 characters")
+        .custom(isUniqueUsername).withMessage("Username taken")
+        .matches(/^[^\s]+$/).withMessage("Username cannot contain spaces")
+        .matches(/[^\d\s]/).withMessage("username must contain at least one letter"),
+    body("password")
+        .notEmpty().withMessage("Password required"),
+    body("confirm")
+        .notEmpty().withMessage("Must confirm password")
+        .custom(passwordsMatch).withMessage("Passwords do not match")
+];
+
+
+
+module.exports = {
+    signupVal
+};
