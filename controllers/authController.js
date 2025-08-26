@@ -80,6 +80,12 @@ const logoutPost = asyncHandler(async function(req, res) {
 });
 
 
+const checkAuthStatusGet = asyncHandler(async function(req, res) {
+    const authenticated = (req.user) ? true : false;
+    return res.json({authenticated: authenticated});
+});
+
+
 
 module.exports = {
     signupPost: [
@@ -92,5 +98,6 @@ module.exports = {
         loginVal,
         loginPost
     ],
-    logoutPost
+    logoutPost,
+    checkAuthStatusGet
 };
