@@ -18,11 +18,19 @@ const signupPost = asyncHandler(async function(req, res, next) {
     const pwdHash = await bcrypt.hash(req.body.password, 10);
 
     try {
+        const globalChat = await db.findChatRoom({
+            where: {
+                name: "Global chat"
+            }
+        });
         await db.createUser({
             data: {
                 username: username,
                 email: email,
-                password: pwdHash
+                password: pwdHash,
+                chatRooms: {
+                    connect: [{id: globalChat.id}]
+                }
             }
         });
     } catch {
