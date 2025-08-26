@@ -46,17 +46,26 @@ const signupVal = [
         .notEmpty().withMessage("Username required")
         .isLength({max: 100}).withMessage("Username must be less than 100 characters")
         .custom(isUniqueUsername).withMessage("Username taken")
-        .matches(/^[^\s]+$/).withMessage("Username cannot contain spaces")
-        .matches(/[^\d\s]/).withMessage("username must contain at least one letter"),
+        .matches(/^[^\s]*$/).withMessage("Username cannot contain spaces")
+        .matches(/[^\d\s]/).withMessage("Username must contain at least one letter"),
     body("password")
-        .notEmpty().withMessage("Password required"),
+        .notEmpty().withMessage("Password required")
+        .isLength({min: 6}).withMessage("Password must be at least 6 characters"),
     body("confirm")
-        .notEmpty().withMessage("Must confirm password")
         .custom(passwordsMatch).withMessage("Passwords do not match")
+];
+
+
+const loginVal = [
+    body("username").trim()
+        .notEmpty().withMessage("Username required"),
+    body("password")
+        .notEmpty().withMessage("Password required")
 ];
 
 
 
 module.exports = {
-    signupVal
+    signupVal,
+    loginVal
 };
