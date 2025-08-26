@@ -27,7 +27,8 @@ model User {
   password       String
   email          String          @unique
   profileImgUrl  String?
-  chatRoomLinks  ChatRoomUser[]
+  // chatRoomLinks  ChatRoomUser[]
+  chatRooms      ChatRoom[]
   friends        UserFriend[]
   friendRequests FriendRequest[]
 }
@@ -45,14 +46,15 @@ model FriendRequest {
 }
 
 model ChatRoom {
-  id    String         @id @default(uuid())
-  users ChatRoomUser[]
+  id    String  @id @default(uuid())
+  name  String?
+  users User[]
 }
 
-model ChatRoomUser {
-  id         String   @id @default(uuid())
-  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
-  chatRoomId String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String
-}
+// model ChatRoomUser {
+//   id         String   @id @default(uuid())
+//   chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+//   chatRoomId String
+//   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   userId     String
+// }
