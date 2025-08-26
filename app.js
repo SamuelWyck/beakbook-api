@@ -7,6 +7,7 @@ const passport = require("./utils/passport.js");
 const {addUserToRes} = require("./utils/authMiddleware.js");
 const cors = require("cors");
 const authRoute = require("./routes/authRoute.js");
+const userRoute = require("./routes/userRoute.js");
 
 
 
@@ -47,6 +48,7 @@ app.use(addUserToRes);
 app.get("/", function(req, res) {
     return res.json({user: res.user});
 });
+app.use("/user", userRoute);
 app.use("/auth", authRoute);
 
 
