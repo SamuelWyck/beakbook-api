@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const {validationResult} = require("express-validator");
-const {signupVal} = require("../utils/validators.js");
+const {signupVal, loginVal} = require("../utils/validators.js");
 const passport = require("../utils/passport.js");
 const db = require("../db/querys.js");
 const bcrypt = require("bcryptjs");
@@ -34,6 +34,13 @@ const signupPost = asyncHandler(async function(req, res, next) {
 
 
 const loginPost = asyncHandler(async function(req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(401).json(
+            {errors: errors.array()}
+        );
+    }
+
     const authfunction = passport.authenticate("local", function(err, user, info) {
         if (err) {
             return res.status(500).json(
@@ -41,7 +48,7 @@ const loginPost = asyncHandler(async function(req, res) {
             );
         }
         if (info) {
-            return res.status(401).json({errors: [{msg: info}]});
+            return res.status(401).json({errors: [info]});
         }
 
         req.login(user, function(error) {
@@ -78,8 +85,12 @@ module.exports = {
     signupPost: [
         signupVal,
         signupPost,
+        loginVal,
         loginPost
     ],
-    loginPost,
+    loginPost: [
+        loginVal,
+        loginPost
+    ],
     logoutPost
 };
