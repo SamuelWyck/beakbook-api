@@ -16,12 +16,12 @@ passport.use(new LocalStrategy(async function(username, password, done) {
         });
     
         if (!user) {
-            return done(null, false, {message: errorMsg});
+            return done(null, false, {msg: errorMsg});
         }
     
         const match = await bcrypt.compare(password, user.password);
         if (!match) {
-            return done(null, false, {message: errorMsg});
+            return done(null, false, {msg: errorMsg});
         }
     
         return done(null, user);
