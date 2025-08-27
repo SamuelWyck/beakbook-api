@@ -1,6 +1,8 @@
 require("dotenv").config();
 const express = require("express");
+const expressWs = require("express-ws");
 const expressSession = require("express-session");
+const db = require("./db/querys.js");
 const {PrismaSessionStore} = require("@quixo3/prisma-session-store");
 const {PrismaClient} = require("./generated/prisma");
 const passport = require("./utils/passport.js");
@@ -12,6 +14,7 @@ const userRoute = require("./routes/userRoute.js");
 
 
 const app = express();
+expressWs(app);
 
 
 app.use(cors({
@@ -45,11 +48,31 @@ app.use(passport.session());
 app.use(addUserToRes);
 
 
-app.get("/", function(req, res) {
-    return res.json({user: res.user});
-});
 app.use("/user", userRoute);
 app.use("/auth", authRoute);
+
+app.ws("/ws/:roomId", function(ws, req) {
+    ws.on("message", function(msg) {
+        msg = JSON.parse(msg);
+        if (msg.message.trim() === "") {
+            return;
+        }
+        
+        try {
+            db.createMessage({
+                data: {
+                    authorId: req.user.id,
+                    text: msg.message,
+                    chatRoomId: req.params.roomId
+                }
+            }).then(function(res) {
+                ws.send(JSON.stringify(res));
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    });
+});
 
 
 const PORT = process.env.PORT;
