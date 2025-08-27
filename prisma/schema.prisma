@@ -31,6 +31,7 @@ model User {
   chatRooms      ChatRoom[]
   friends        UserFriend[]
   friendRequests FriendRequest[]
+  messages       Message[]
 }
 
 model UserFriend {
@@ -46,9 +47,19 @@ model FriendRequest {
 }
 
 model ChatRoom {
-  id    String  @id @default(uuid())
-  name  String?
-  users User[]
+  id       String    @id @default(uuid())
+  name     String?
+  users    User[]
+  messages Message[]
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  text       String
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId   String
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+  chatRoomId String
 }
 
 // model ChatRoomUser {
