@@ -1,4 +1,4 @@
-const {body} = require("express-validator");
+const {body, param} = require("express-validator");
 const db = require("../db/querys.js");
 
 
@@ -64,8 +64,21 @@ const loginVal = [
 ];
 
 
+const maxMsgLength = 10000;
+
+
+const messageVal = [
+    body("message").trim()
+        .notEmpty().withMessage("Message must not be empty")
+        .isLength({max: maxMsgLength}).withMessage("Text must be shorter than 10000 characters"),
+    param("messageId").trim()
+        .notEmpty().withMessage("Missing message id param")
+];
+
+
 
 module.exports = {
     signupVal,
-    loginVal
+    loginVal,
+    messageVal
 };
