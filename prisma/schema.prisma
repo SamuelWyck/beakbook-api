@@ -60,6 +60,7 @@ model Message {
   authorId   String
   chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
   chatRoomId String
+  timeStamp  DateTime @default(now())
 }
 
 // model ChatRoomUser {
