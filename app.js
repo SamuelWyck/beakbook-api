@@ -10,6 +10,7 @@ const {addUserToRes} = require("./utils/authMiddleware.js");
 const cors = require("cors");
 const authRoute = require("./routes/authRoute.js");
 const userRoute = require("./routes/userRoute.js");
+const messageRoute = require("./routes/messageRoute.js");
 
 
 
@@ -50,11 +51,16 @@ app.use(addUserToRes);
 
 app.use("/user", userRoute);
 app.use("/auth", authRoute);
+app.use("/messages", messageRoute);
 
 app.ws("/ws/:roomId", function(ws, req) {
     ws.on("message", function(msg) {
+        const maxMsgLength = 10000;
         msg = JSON.parse(msg);
         if (msg.message.trim() === "") {
+            return;
+        }
+        if (msg.message.length > maxMsgLength) {
             return;
         }
         
@@ -64,6 +70,15 @@ app.ws("/ws/:roomId", function(ws, req) {
                     authorId: req.user.id,
                     text: msg.message,
                     chatRoomId: req.params.roomId
+                },
+                include: {
+                    author: {
+                        select: {
+                            id: true,
+                            username: true,
+                            profileImgUrl: true
+                        }
+                    }
                 }
             }).then(function(res) {
                 ws.send(JSON.stringify(res));
