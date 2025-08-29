@@ -10,7 +10,7 @@ const {addUserToRes} = require("./utils/authMiddleware.js");
 const cors = require("cors");
 const authRoute = require("./routes/authRoute.js");
 const userRoute = require("./routes/userRoute.js");
-const messageRoute = require("./routes/messageRoute.js");
+const messagesRoute = require("./routes/messagesRoute.js");
 
 
 
@@ -51,7 +51,7 @@ app.use(addUserToRes);
 
 app.use("/user", userRoute);
 app.use("/auth", authRoute);
-app.use("/messages", messageRoute);
+app.use("/messages", messagesRoute);
 
 app.ws("/ws/:roomId", function(ws, req) {
     ws.on("message", function(msg) {
