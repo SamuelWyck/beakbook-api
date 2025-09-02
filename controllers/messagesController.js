@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const {validationResult} = require("express-validator");
 const {messageVal} = require("../utils/validators.js");
 const db = require("../db/querys.js");
+const pageManger = require("../utils/pagination.js");
 
 
 
@@ -13,34 +14,30 @@ const chatMessagesGet = asyncHandler(async function(req, res) {
     }
 
     const roomId = req.params.roomId;
-    const userId = req.user.id;
+    const pageNum = (req.query.pageNum) ? req.query.pageNum : 0;
 
     let messages = null;
     try {
-        const chatRoom = await db.findChatRoom({
+        messages = await db.findChatMessages({
+            skip: pageManger.calcSkipNum(pageNum),
+            take: pageManger.takeNum,
             where: {
-                id: roomId,
-                users: {
-                    some: {
-                        id: userId
+                chatRoomId: roomId
+
+            },
+            include: {
+                author: {
+                    select: {
+                        id: true,
+                        username: true,
+                        profileImgUrl: true
                     }
                 }
             },
-            include: {
-                messages: {
-                    include: {
-                        author: {
-                            select: {
-                                id: true,
-                                username: true,
-                                profileImgUrl: true
-                            }
-                        }
-                    }
-                }
+            orderBy: {
+                timeStamp: "desc"
             }
         });
-        messages = chatRoom.messages;
     } catch (error) {
         console.log(error);
         return res.status(500).json(
@@ -48,7 +45,12 @@ const chatMessagesGet = asyncHandler(async function(req, res) {
         );
     }
 
-    return res.json({messages});
+    const moreMsgs = messages.length === pageManger.takeNum;
+    if (messages.length === pageManger.takeNum) {
+        messages.pop();
+    }
+
+    return res.json({messages, moreMsgs});
 });
 
 
