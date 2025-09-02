@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
-const expressWs = require("express-ws");
+const {Server} = require("socket.io");
+const {createServer} = require("http");
 const expressSession = require("express-session");
 const db = require("./db/querys.js");
 const {PrismaSessionStore} = require("@quixo3/prisma-session-store");
@@ -15,7 +16,10 @@ const messagesRoute = require("./routes/messagesRoute.js");
 
 
 const app = express();
-expressWs(app);
+const server = createServer(app);
+const io = new Server(server, {
+    cors: process.env.FRONT_END_DOMAIN
+});
 
 
 app.use(cors({
@@ -53,23 +57,31 @@ app.use("/user", userRoute);
 app.use("/auth", authRoute);
 app.use("/messages", messagesRoute);
 
-app.ws("/ws/:roomId", function(ws, req) {
-    ws.on("message", function(msg) {
+io.on("connection", function(socket) {
+    socket.on("join-room", function(room) {
+        socket.join(room);
+    });
+
+    socket.on("leave-room", function(room) {
+        socket.leave(room);
+    });
+    
+    socket.on("message", async function(msg, roomId) {
         const maxMsgLength = 10000;
-        msg = JSON.parse(msg);
-        if (msg.message.trim() === "") {
+        if (!msg.userId || !msg.message || !roomId) {
             return;
         }
-        if (msg.message.length > maxMsgLength) {
+        const text = msg.message.trim();
+        if (maxMsgLength < text.length || text === "") {
             return;
         }
-        
+
         try {
-            db.createMessage({
+            const message = await db.createMessage({
                 data: {
-                    authorId: req.user.id,
-                    text: msg.message,
-                    chatRoomId: req.params.roomId
+                    text: text,
+                    authorId: msg.userId,
+                    chatRoomId: roomId
                 },
                 include: {
                     author: {
@@ -80,9 +92,8 @@ app.ws("/ws/:roomId", function(ws, req) {
                         }
                     }
                 }
-            }).then(function(res) {
-                ws.send(JSON.stringify(res));
             });
+            io.in(roomId).emit("message", message);
         } catch (error) {
             console.log(error);
         }
@@ -93,6 +104,6 @@ app.ws("/ws/:roomId", function(ws, req) {
 const PORT = process.env.PORT;
 
 
-app.listen(PORT, function() {
+server.listen(PORT, function() {
     console.log(`Server running on port ${PORT}!`);
 });
