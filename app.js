@@ -12,6 +12,7 @@ const cors = require("cors");
 const authRoute = require("./routes/authRoute.js");
 const userRoute = require("./routes/userRoute.js");
 const messagesRoute = require("./routes/messagesRoute.js");
+const friendsRoute = require("./routes/friendsRoute.js");
 
 
 
@@ -56,6 +57,7 @@ app.use(addUserToRes);
 app.use("/user", userRoute);
 app.use("/auth", authRoute);
 app.use("/messages", messagesRoute);
+app.use("/friends", friendsRoute);
 
 io.on("connection", function(socket) {
     socket.on("join-room", function(room) {
