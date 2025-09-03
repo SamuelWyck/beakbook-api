@@ -47,6 +47,12 @@ async function deleteMessage(options) {
 };
 
 
+async function createFriendRequest(options) {
+    const request = await prisma.friendRequest.create(options);
+    return request;
+};
+
+
 
 module.exports = {
     findUniqueUser,
@@ -55,5 +61,6 @@ module.exports = {
     createMessage,
     findChatMessages,
     editMessage,
-    deleteMessage
+    deleteMessage,
+    createFriendRequest
 };
