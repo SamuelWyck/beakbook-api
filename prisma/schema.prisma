@@ -22,16 +22,17 @@ model Session {
 }
 
 model User {
-  id             String          @id @default(uuid())
-  username       String          @unique
-  password       String
-  email          String          @unique
-  profileImgUrl  String?
+  id                 String          @id @default(uuid())
+  username           String          @unique
+  password           String
+  email              String          @unique
+  profileImgUrl      String?
   // chatRoomLinks  ChatRoomUser[]
-  chatRooms      ChatRoom[]
-  friends        UserFriend[]
-  friendRequests FriendRequest[]
-  messages       Message[]
+  chatRooms          ChatRoom[]
+  friends            UserFriend[]
+  friendRequests     FriendRequest[] @relation(name: "received")
+  sentFriendRequests FriendRequest[] @relation(name: "sent")
+  messages           Message[]
 }
 
 model UserFriend {
@@ -42,8 +43,10 @@ model UserFriend {
 
 model FriendRequest {
   id               String @id @default(uuid())
-  requestingUser   User   @relation(fields: [requestingUserId], references: [id], onDelete: Cascade)
+  requestingUser   User   @relation(name: "sent", fields: [requestingUserId], references: [id], onDelete: Cascade)
   requestingUserId String
+  receivingUser    User   @relation(name: "received", fields: [receivingUserId], references: [id], onDelete: Cascade)
+  receivingUserId  String
 }
 
 model ChatRoom {
