@@ -24,7 +24,8 @@ const userDataGet = asyncHandler(async function(req, res) {
                             users: {
                                 select: {
                                     id: true,
-                                    username: true
+                                    username: true,
+                                    profileImgUrl: true
                                 }
                             }
                         }
@@ -34,7 +35,8 @@ const userDataGet = asyncHandler(async function(req, res) {
                             user: {
                                 select: {
                                     id: true,
-                                    username: true
+                                    username: true,
+                                    profileImgUrl: true
                                 }
                             }
                         }
@@ -44,7 +46,8 @@ const userDataGet = asyncHandler(async function(req, res) {
                             requestingUser: {
                                 select: {
                                     id: true,
-                                    username: true
+                                    username: true,
+                                    profileImgUrl: true
                                 }
                             }
                         }
