@@ -65,6 +65,14 @@ io.on("connection", function(socket) {
     socket.on("leave-room", function(room) {
         socket.leave(room);
     });
+
+    socket.on("edit-msg", function(message) {
+        io.to(message.chatRoomId).emit("edit-msg", message);
+    });
+
+    socket.on("delete-msg", function(msgInfo) {
+        io.to(msgInfo.roomId).emit("delete-msg", msgInfo);
+    });
     
     socket.on("message", async function(msg, roomId) {
         const maxMsgLength = 10000;
