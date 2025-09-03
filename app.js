@@ -93,7 +93,7 @@ io.on("connection", function(socket) {
                     }
                 }
             });
-            io.in(roomId).emit("message", message);
+            io.to(roomId).emit("message", message);
         } catch (error) {
             console.log(error);
         }
