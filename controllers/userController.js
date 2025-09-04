@@ -51,6 +51,17 @@ const userDataGet = asyncHandler(async function(req, res) {
                                 }
                             }
                         }
+                    },
+                    sentFriendRequests: {
+                        include: {
+                            receivingUser: {
+                                select: {
+                                    id: true,
+                                    username: true,
+                                    profileImgUrl: true
+                                }
+                            }
+                        }
                     }
                 }
             })
@@ -62,6 +73,7 @@ const userDataGet = asyncHandler(async function(req, res) {
                 chatRooms: userData.chatRooms,
                 friends: userData.friends,
                 friendRequests: userData.friendRequests,
+                sentRequests: userData.sentFriendRequests,
                 globalChat: globalChat
             }
         });
