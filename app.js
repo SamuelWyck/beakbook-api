@@ -60,12 +60,35 @@ app.use("/messages", messagesRoute);
 app.use("/friends", friendsRoute);
 
 io.on("connection", function(socket) {
+    const userId = socket.client.request._query.userId;
+    if (!userId) {
+        socket.disconnect();
+    }
+    socket.join(userId);
+
+
     socket.on("join-room", function(room) {
         socket.join(room);
     });
 
     socket.on("leave-room", function(room) {
         socket.leave(room);
+    });
+
+    socket.on("friend-request", function(request, room) {
+        io.to(room).emit("friend-request", request);
+    });
+
+    socket.on("sent-request", function(request, room) {
+        io.to(room).emit("sent-request", request);
+    });
+
+    socket.on("del-request", function(request, room) {
+        io.to(room).emit("del-request", request);
+    });
+
+    socket.on("del-sent-request", function(request, room) {
+        io.to(room).emit("del-sent-request", request);
     });
 
     socket.on("edit-msg", function(message) {
