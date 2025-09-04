@@ -76,9 +76,15 @@ const messageVal = [
 ];
 
 
+const friendRequestVal = [
+    body("receivingUserId").trim()
+        .notEmpty().withMessage("Missing user id")
+];
+
 
 module.exports = {
     signupVal,
     loginVal,
-    messageVal
+    messageVal,
+    friendRequestVal
 };
