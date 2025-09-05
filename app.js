@@ -95,8 +95,8 @@ io.on("connection", function(socket) {
         io.to(room).emit("add-friend", friendInfo);
     });
 
-    socket.on("del-friend", function(relationId, room) {
-        io.to(room).emit("del-friend", relationId);
+    socket.on("del-friend", function(relationId, userId, room) {
+        io.to(room).emit("del-friend", relationId, userId);
     });
 
     socket.on("edit-msg", function(message) {
