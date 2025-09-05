@@ -71,6 +71,12 @@ async function deleteFriend(options) {
 };
 
 
+async function findUsers(options) {
+    const users = await prisma.user.findMany(options);
+    return users;
+};
+
+
 
 module.exports = {
     findUniqueUser,
@@ -83,5 +89,6 @@ module.exports = {
     createFriendRequest,
     deleteFriendRequest,
     createFriend,
-    deleteFriend
+    deleteFriend,
+    findUsers
 };
