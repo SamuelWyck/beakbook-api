@@ -59,6 +59,18 @@ async function deleteFriendRequest(options) {
 }
 
 
+async function createFriend(options) {
+    const friend = await prisma.userFriend.create(options);
+    return friend;
+};
+
+
+async function deleteFriend(options) {
+    const relation = await prisma.userFriend.delete(options);
+    return relation;
+};
+
+
 
 module.exports = {
     findUniqueUser,
@@ -69,5 +81,7 @@ module.exports = {
     editMessage,
     deleteMessage,
     createFriendRequest,
-    deleteFriendRequest
+    deleteFriendRequest,
+    createFriend,
+    deleteFriend
 };
