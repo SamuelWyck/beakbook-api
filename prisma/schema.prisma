@@ -29,16 +29,19 @@ model User {
   profileImgUrl      String?
   // chatRoomLinks  ChatRoomUser[]
   chatRooms          ChatRoom[]
-  friends            UserFriend[]
+  friends            UserFriend[]    @relation(name: "friend")
+  friendShips        UserFriend[]    @relation(name: "friendship")
   friendRequests     FriendRequest[] @relation(name: "received")
   sentFriendRequests FriendRequest[] @relation(name: "sent")
   messages           Message[]
 }
 
 model UserFriend {
-  id     String @id @default(uuid())
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
+  id       String @id @default(uuid())
+  user     User   @relation(name: "friend", fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  friend   User   @relation(name: "friendship", fields: [friendId], references: [id], onDelete: Cascade)
+  friendId String
 }
 
 model FriendRequest {
