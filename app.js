@@ -13,6 +13,7 @@ const authRoute = require("./routes/authRoute.js");
 const userRoute = require("./routes/userRoute.js");
 const messagesRoute = require("./routes/messagesRoute.js");
 const friendsRoute = require("./routes/friendsRoute.js");
+const chatRoute = require("./routes/chatRoute.js");
 
 
 
@@ -58,6 +59,7 @@ app.use("/user", userRoute);
 app.use("/auth", authRoute);
 app.use("/messages", messagesRoute);
 app.use("/friends", friendsRoute);
+app.use("/chat", chatRoute);
 
 io.on("connection", function(socket) {
     const userId = socket.client.request._query.userId;
