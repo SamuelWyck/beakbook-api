@@ -32,6 +32,17 @@ const userDataGet = asyncHandler(async function(req, res) {
                     },
                     friends: {
                         include: {
+                            friend: {
+                                select: {
+                                    id: true,
+                                    username: true,
+                                    profileImgUrl: true
+                                }
+                            }
+                        }
+                    },
+                    friendShips: {
+                        include: {
                             user: {
                                 select: {
                                     id: true,
@@ -72,6 +83,7 @@ const userDataGet = asyncHandler(async function(req, res) {
                 user: req.user,
                 chatRooms: userData.chatRooms,
                 friends: userData.friends,
+                friendShips: userData.friendShips,
                 friendRequests: userData.friendRequests,
                 sentRequests: userData.sentFriendRequests,
                 globalChat: globalChat
