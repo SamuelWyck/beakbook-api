@@ -91,6 +91,14 @@ io.on("connection", function(socket) {
         io.to(room).emit("del-sent-request", request);
     });
 
+    socket.on("add-friend", function(friendInfo, room) {
+        io.to(room).emit("add-friend", friendInfo);
+    });
+
+    socket.on("del-friend", function(relationId, room) {
+        io.to(room).emit("del-friend", relationId);
+    });
+
     socket.on("edit-msg", function(message) {
         io.to(message.chatRoomId).emit("edit-msg", message);
     });
