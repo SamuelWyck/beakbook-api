@@ -11,6 +11,7 @@ chatRoute.use(isLoggedIn);
 
 chatRoute.get("/users/:chatId", chatController.getChatUsers);
 chatRoute.post("/new", chatController.createChatPost);
+chatRoute.put("/leave", chatController.leaveChatPut);
 
 
 
