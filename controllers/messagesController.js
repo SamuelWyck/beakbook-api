@@ -15,12 +15,11 @@ const chatMessagesGet = asyncHandler(async function(req, res) {
 
     const roomId = req.params.roomId;
     const pageNum = (req.query.pageNum) ? req.query.pageNum : 0;
-
     let messages = null;
     try {
         messages = await db.findChatMessages({
-            skip: pageManger.calcSkipNum(pageNum),
-            take: pageManger.takeNum,
+            skip: pageManger.calcMsgSkip(pageNum),
+            take: pageManger.msgTakeNum,
             where: {
                 chatRoomId: roomId
 
@@ -45,9 +44,10 @@ const chatMessagesGet = asyncHandler(async function(req, res) {
         );
     }
 
-    const moreMsgs = messages.length === pageManger.takeNum;
-    if (messages.length === pageManger.takeNum) {
+    let moreMsgs = false;
+    if (messages.length === pageManger.msgTakeNum) {
         messages.pop();
+        moreMsgs = true;
     }
 
     return res.json({messages, moreMsgs});
