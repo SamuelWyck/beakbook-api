@@ -89,6 +89,18 @@ async function createChat(options) {
 };
 
 
+async function updateChat(options) {
+    const chat = await prisma.chatRoom.update(options);
+    return chat;
+};
+
+
+async function deleteChat(options) {
+    const chat = await prisma.chatRoom.delete(options);
+    return chat;
+};
+
+
 
 module.exports = {
     findUniqueUser,
@@ -104,5 +116,7 @@ module.exports = {
     deleteFriend,
     findUsers,
     findFriends,
-    createChat
+    createChat,
+    updateChat,
+    deleteChat
 };
