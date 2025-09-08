@@ -82,9 +82,18 @@ const friendRequestVal = [
 ];
 
 
+const createChatVal = [
+    body("ids")
+        .notEmpty().withMessage("Missing user ids")
+        .isArray().withMessage("Expected array")
+];
+
+
+
 module.exports = {
     signupVal,
     loginVal,
     messageVal,
-    friendRequestVal
+    friendRequestVal,
+    createChatVal
 };
