@@ -12,6 +12,7 @@ friendsRoute.post("/request", friendsController.friendRequestPost);
 friendsRoute.delete("/request/delete/:requestId", friendsController.delFriendRequest);
 friendsRoute.post("/add", friendsController.addFriendPost);
 friendsRoute.delete("/delete/:relationId", friendsController.delFriend);
+friendsRoute.get("/", friendsController.getFriends);
 
 
 
