@@ -1,11 +1,17 @@
 class Pagination {
     constructor() {
-        this.takeNum = 51;
-    }
+        this.msgTakeNum = 51;
+        this.userTakeNum = 31;
+    };
 
 
-    calcSkipNum(pageNum) {
-        return (this.takeNum - 1) * pageNum;
+    calcMsgSkip(pageNum) {
+        return (this.msgTakeNum - 1) * pageNum;
+    };
+
+
+    calcUserSkip(pageNum) {
+        return (this.userTakeNum - 1) * pageNum;
     };
 };
 
