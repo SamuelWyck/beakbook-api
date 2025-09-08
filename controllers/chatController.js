@@ -1,6 +1,9 @@
 const asyncHandler = require("express-async-handler");
 const db = require("../db/querys.js");
 const pageManger = require("../utils/pagination.js");
+const {validationResult} = require("express-validator");
+const {createChatVal} = require("../utils/validators.js");
+const { connect } = require("../routes/messagesRoute.js");
 
 
 
@@ -65,6 +68,50 @@ const getChatUsers = asyncHandler(async function(req, res) {
 
 
 
+const createChatPost = asyncHandler(async function(req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({errors: errors.array()});
+    }
+
+    const connectionArray = [];
+    for (let id of req.body.ids) {
+        connectionArray.push({
+            id: id
+        });
+    }
+    connectionArray.push({id: req.user.id});
+
+    let chat = null;
+    try {
+        chat = await db.createChat({
+            data: {
+                users: {
+                    connect: connectionArray
+                }
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to create chat"}]}
+        );
+    }
+    if (!chat) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to create chat"}]}
+        );
+    }
+
+    return res.json({chat});
+});
+
+
+
 module.exports = {
-    getChatUsers
+    getChatUsers,
+    createChatPost: [
+        createChatVal,
+        createChatPost
+    ]
 };
