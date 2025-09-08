@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const db = require("../db/querys.js");
+const pageManger = require("../utils/pagination.js");
 
 
 
@@ -12,10 +13,13 @@ const getChatUsers = asyncHandler(async function(req, res) {
 
     const userId = req.user.id;
     const chatId = req.params.chatId;
-
+    const pageNum = (req.query.pageNum) ? 
+    req.query.pageNum : 0;
     let users = null;
     try {
         users = await db.findUsers({
+            take: pageManger.userTakeNum,
+            skip: pageManger.calcUserSkip(pageNum),
             where: {
                 chatRooms: {
                     some: {
@@ -50,7 +54,13 @@ const getChatUsers = asyncHandler(async function(req, res) {
             {errors: [{msg: "Unable to find users"}]}
         );
     }
-    return res.json({chatUsers: users});
+
+    let moreUsers = false;
+    if (users.length === pageManger.userTakeNum) {
+        moreUsers = true;
+        users.pop();
+    }
+    return res.json({chatUsers: users, moreUsers});
 });
 
 
