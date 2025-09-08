@@ -240,6 +240,72 @@ const delFriend = asyncHandler(async function(req, res) {
 
 
 
+const getFriends = asyncHandler(async function(req, res) {
+    const userId = req.user.id;
+    const roomId = (req.query.roomId) 
+    ? req.query.roomId : null;
+
+    let friends = null;
+    let friendShips = null;
+    try {
+        const [usrFrnds, usrFrndShips] = await Promise.all([
+            db.findFriends({
+                where: {
+                    userId: userId,
+                    friend: {
+                        chatRooms: {
+                            none: {
+                                id: roomId
+                            }
+                        }
+                    }
+                },
+                include: {
+                    friend: {
+                        select: {
+                            id: true,
+                            profileImgUrl: true,
+                            username: true
+                        }
+                    }
+                }
+            }),
+            db.findFriends({
+                where: {
+                    friendId: userId,
+                    user: {
+                        chatRooms: {
+                            none: {
+                                id: roomId
+                            }
+                        }
+                    }
+                },
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            profileImgUrl: true,
+                            username: true
+                        }
+                    }
+                }
+            })
+        ]);
+        friends = usrFrnds;
+        friendShips = usrFrndShips;
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to laod friends"}]}
+        );
+    }
+
+    return res.json({friends, friendShips});
+});
+
+
+
 module.exports = {
     friendRequestPost: [
         friendRequestVal,
@@ -247,5 +313,6 @@ module.exports = {
     ],
     delFriendRequest,
     addFriendPost,
-    delFriend
+    delFriend,
+    getFriends
 };
