@@ -10,6 +10,7 @@ const chatRoute = Router();
 chatRoute.use(isLoggedIn);
 
 chatRoute.get("/users/:chatId", chatController.getChatUsers);
+chatRoute.post("/new", chatController.createChatPost);
 
 
 
