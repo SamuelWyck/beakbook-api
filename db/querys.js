@@ -83,6 +83,12 @@ async function findFriends(options) {
 };
 
 
+async function createChat(options) {
+    const chat = await prisma.chatRoom.create(options);
+    return chat;
+};
+
+
 
 module.exports = {
     findUniqueUser,
@@ -97,5 +103,6 @@ module.exports = {
     createFriend,
     deleteFriend,
     findUsers,
-    findFriends
+    findFriends,
+    createChat
 };
