@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const db = require("../db/querys.js");
 const pageManger = require("../utils/pagination.js");
 const {validationResult} = require("express-validator");
-const {createChatVal} = require("../utils/validators.js");
+const {createChatVal, addUserToChatVal} = require("../utils/validators.js");
 
 
 
@@ -206,11 +206,66 @@ const leaveChatPut = asyncHandler(async function(req, res) {
 
 
 
+const joinChatPut = asyncHandler(async function(req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({errors: errors.array()});
+    }
+
+    const ids = req.body.ids;
+    const roomId = req.body.roomId;
+    const connectionIds = [];
+    for (let id of ids) {
+        connectionIds.push({id: id});
+    }
+
+    let chat = null;
+    try {
+        chat = await db.updateChat({
+            where: {
+                id: roomId
+            },
+            data: {
+                users: {
+                    connect: connectionIds
+                }
+            },
+            include: {
+                users: {
+                    select: {
+                        id: true,
+                        username: true,
+                        profileImgUrl: true
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to add users"}]}
+        );
+    }
+    if (!chat) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to add users"}]}
+        );
+    }
+
+    return res.json({chat});
+});
+
+
+
 module.exports = {
     getChatUsers,
     createChatPost: [
         createChatVal,
         createChatPost
     ],
-    leaveChatPut
+    leaveChatPut,
+    joinChatPut: [
+        addUserToChatVal,
+        joinChatPut
+    ]
 };
