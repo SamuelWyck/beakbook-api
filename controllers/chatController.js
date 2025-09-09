@@ -3,7 +3,6 @@ const db = require("../db/querys.js");
 const pageManger = require("../utils/pagination.js");
 const {validationResult} = require("express-validator");
 const {createChatVal} = require("../utils/validators.js");
-const { connect } = require("../routes/messagesRoute.js");
 
 
 
@@ -20,32 +19,62 @@ const getChatUsers = asyncHandler(async function(req, res) {
     req.query.pageNum : 0;
     let users = null;
     try {
-        users = await db.findUsers({
-            take: pageManger.userTakeNum,
-            skip: pageManger.calcUserSkip(pageNum),
-            where: {
-                chatRooms: {
-                    some: {
-                        id: chatId
-                    },
-                    some: {
-                        users: {
-                            some: {
-                                id: userId
-                            }
+        const [chat, chatUsers] = await Promise.all([
+            db.findChatRoom({
+                where: {
+                    id: chatId,
+                    users: {
+                        some: {
+                            id: userId
                         }
                     }
                 }
-            },
-            select: {
-                id: true,
-                profileImgUrl: true,
-                username: true
-            },
-            orderBy: {
-                username: "desc"
-            }
-        });
+            }),
+            db.findUsers({
+                take: pageManger.userTakeNum,
+                skip: pageManger.calcUserSkip(pageNum),
+                where: {
+                    chatRooms: {
+                        some: {
+                            id: chatId
+                        }
+                    }
+                },
+                select: {
+                    id: true,
+                    profileImgUrl: true,
+                    username: true
+                },
+                orderBy: {
+                    username: "desc"
+                }
+            })
+        ]);
+        if (!chat) {
+            return res.status(401).json(
+                {errors: [{msg: "Forbidden"}]}
+            );
+        }
+        users = chatUsers;
+        // users = await db.findUsers({
+        //     take: pageManger.userTakeNum,
+        //     skip: pageManger.calcUserSkip(pageNum),
+        //     where: {
+        //         chatRooms: {
+        //             some: {
+        //                 id: chatId
+        //             }
+        //         }
+        //     },
+        //     select: {
+        //         id: true,
+        //         profileImgUrl: true,
+        //         username: true
+        //     },
+        //     orderBy: {
+        //         username: "desc"
+        //     }
+        // });
     } catch (error) {
         console.log(error);
         return res.status(500).json(
@@ -89,6 +118,15 @@ const createChatPost = asyncHandler(async function(req, res) {
                 users: {
                     connect: connectionArray
                 }
+            },
+            include: {
+                users: {
+                    select: {
+                        username: true,
+                        id: true,
+                        profileImgUrl: true
+                    }
+                }
             }
         });
     } catch (error) {
@@ -130,7 +168,13 @@ const leaveChatPut = asyncHandler(async function(req, res) {
                 }
             },
             include: {
-                users: true
+                users: {
+                    select: {
+                        id: true,
+                        username: true,
+                        profileImgUrl: true
+                    }
+                }
             }
         });
     } catch (error) {
