@@ -89,11 +89,21 @@ const createChatVal = [
 ];
 
 
+const addUserToChatVal = [
+    body("ids")
+        .notEmpty().withMessage("Missing user ids")
+        .isArray().withMessage("Expected array"),
+    body("roomId").trim()
+        .notEmpty().withMessage("Missing chat id")
+];
+
+
 
 module.exports = {
     signupVal,
     loginVal,
     messageVal,
     friendRequestVal,
-    createChatVal
+    createChatVal,
+    addUserToChatVal
 };
