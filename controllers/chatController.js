@@ -257,6 +257,45 @@ const joinChatPut = asyncHandler(async function(req, res) {
 
 
 
+const getOrCreateChat = asyncHandler(async function(req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({errors: errors.array()});
+    }
+
+    const ids = [
+        req.body.ids[0],
+        req.user.id
+    ];
+
+    let chat = null;
+    try {
+        chat = await db.findChatRoom({
+            where: {
+                users: {
+                    exactly: {
+                        id: {
+                            in: {
+                                ids
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to find chat"}]}
+        );
+    }
+    console.log(chat)
+
+    return res.json({errors: [{msg: "yes"}]});
+});
+
+
+
 module.exports = {
     getChatUsers,
     createChatPost: [
@@ -267,5 +306,9 @@ module.exports = {
     joinChatPut: [
         addUserToChatVal,
         joinChatPut
+    ],
+    getOrCreateChat: [
+        createChatVal,
+        getOrCreateChat
     ]
 };
