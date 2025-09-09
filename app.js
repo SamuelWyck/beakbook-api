@@ -77,6 +77,14 @@ io.on("connection", function(socket) {
         socket.leave(room);
     });
 
+    socket.on("add-chat", function(chat, roomIds) {
+        io.to(roomIds).emit("add-chat", chat);
+    });
+
+    socket.on("left-chat", function(chat, roomIds) {
+        io.to(roomIds).emit("left-chat", chat);
+    });
+
     socket.on("friend-request", function(request, room) {
         io.to(room).emit("friend-request", request);
     });
