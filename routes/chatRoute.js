@@ -13,6 +13,7 @@ chatRoute.get("/users/:chatId", chatController.getChatUsers);
 chatRoute.post("/new", chatController.createChatPost);
 chatRoute.put("/leave", chatController.leaveChatPut);
 chatRoute.put("/join", chatController.joinChatPut);
+chatRoute.post("/find", chatController.getOrCreateChat);
 
 
 
