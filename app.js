@@ -141,10 +141,42 @@ io.on("connection", function(socket) {
                             username: true,
                             profileImgUrl: true
                         }
+                    },
+                    chatRoom: {
+                        include: {
+                            users: {
+                                select: {
+                                    id: true
+                                }
+                            }
+                        }
                     }
                 }
             });
+
+            const chatRoom = message.chatRoom;
+            delete message.chatRoom;
             io.to(roomId).emit("message", message);
+            if (chatRoom.name === null) {
+                const roomIds = [];
+                for (let user of chatRoom.users) {
+                    roomIds.push(user.id);
+                }
+                io.to(roomIds).emit("new-msg", chatRoom.id);
+                await db.updateManyNotifications({
+                    where: {
+                        chatRoomId: roomId,
+                        NOT: {
+                            userId: {
+                                in: Array.from(socket.rooms)
+                            }
+                        }
+                    },
+                    data: {
+                        active: true
+                    }
+                });
+            }
         } catch (error) {
             console.log(error);
         }
