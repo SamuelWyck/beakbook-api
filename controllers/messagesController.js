@@ -14,29 +14,45 @@ const chatMessagesGet = asyncHandler(async function(req, res) {
     }
 
     const roomId = req.params.roomId;
+    const userId = req.user.id;
     const pageNum = (req.query.pageNum) ? req.query.pageNum : 0;
-    let messages = null;
-    try {
-        messages = await db.findChatMessages({
-            skip: pageManger.calcMsgSkip(pageNum),
-            take: pageManger.msgTakeNum,
-            where: {
-                chatRoomId: roomId
 
-            },
-            include: {
-                author: {
-                    select: {
-                        id: true,
-                        username: true,
-                        profileImgUrl: true
+    let messages = null;
+    let notification = null;
+    try {
+        [messages, notification] = await Promise.all([
+            db.findChatMessages({
+                skip: pageManger.calcMsgSkip(pageNum),
+                take: pageManger.msgTakeNum,
+                where: {
+                    chatRoomId: roomId
+    
+                },
+                include: {
+                    author: {
+                        select: {
+                            id: true,
+                            username: true,
+                            profileImgUrl: true
+                        }
                     }
+                },
+                orderBy: {
+                    timeStamp: "desc"
                 }
-            },
-            orderBy: {
-                timeStamp: "desc"
-            }
-        });
+            }),
+            db.updateNotification({
+                where: {
+                    userId_chatRoomId: {
+                        userId: userId,
+                        chatRoomId: roomId
+                    }
+                },
+                data: {
+                    active: false
+                }
+            })
+        ]);
     } catch (error) {
         console.log(error);
         return res.status(500).json(
