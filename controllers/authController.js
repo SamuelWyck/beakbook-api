@@ -30,6 +30,11 @@ const signupPost = asyncHandler(async function(req, res, next) {
                 password: pwdHash,
                 chatRooms: {
                     connect: [{id: globalChat.id}]
+                },
+                notifications: {
+                    create: [
+                        {chatRoomId: globalChat.id}
+                    ]
                 }
             }
         });
