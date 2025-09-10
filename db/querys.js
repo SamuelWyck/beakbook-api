@@ -107,6 +107,34 @@ async function deleteChat(options) {
 };
 
 
+async function createManyNotifications(options) {
+    const count = await prisma.notification.createMany(
+        options
+    );
+    return count;
+};
+
+
+async function deleteNotification(options) {
+    const notify = await prisma.notification.delete(options);
+    return notify;
+};
+
+
+async function updateNotification(options) {
+    const notify = await prisma.notification.update(options);
+    return notify;
+};
+
+
+async function updateManyNotifications(options) {
+    const notify = await prisma.notification.updateMany(
+        options
+    );
+    return notify;
+};
+
+
 
 module.exports = {
     findUniqueUser,
@@ -125,5 +153,9 @@ module.exports = {
     findFriends,
     createChat,
     updateChat,
-    deleteChat
+    deleteChat,
+    createManyNotifications,
+    deleteNotification,
+    updateNotification,
+    updateManyNotifications
 };
