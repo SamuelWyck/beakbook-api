@@ -129,6 +129,17 @@ const createChatPost = asyncHandler(async function(req, res) {
                 }
             }
         });
+
+        const notifyData = [];
+        for (let user of connectionArray) {
+            notifyData.push({
+                userId: user.id,
+                chatRoomId: chat.id
+            });
+        }
+        await db.createManyNotifications({
+            data: notifyData
+        });
     } catch (error) {
         console.log(error);
         return res.status(500).json(
@@ -157,33 +168,44 @@ const leaveChatPut = asyncHandler(async function(req, res) {
     const roomId = req.body.roomId;
 
     let chat = null;
+    let notification = null;
     try {
-        chat = await db.updateChat({
-            where: {
-                id: roomId
-            },
-            data: {
-                users: {
-                    disconnect: [{id: userId}]
-                }
-            },
-            include: {
-                users: {
-                    select: {
-                        id: true,
-                        username: true,
-                        profileImgUrl: true
+        [chat, notification] = await Promise.all([
+            db.updateChat({
+                where: {
+                    id: roomId
+                },
+                data: {
+                    users: {
+                        disconnect: [{id: userId}]
+                    }
+                },
+                include: {
+                    users: {
+                        select: {
+                            id: true,
+                            username: true,
+                            profileImgUrl: true
+                        }
                     }
                 }
-            }
-        });
+            }),
+            db.deleteNotification({
+                where: {
+                    userId_chatRoomId: {
+                        userId: userId,
+                        chatRoomId: roomId
+                    }
+                }
+            })
+        ]);
     } catch (error) {
         console.log(error);
         return res.status(500).json(
             {errors: [{msg: "Unable to leave chat"}]}
         );
     }
-    if (!chat) {
+    if (!chat || !notification) {
         return res.status(400).json(
             {errors: [{msg: "Unable to leave chat"}]}
         );
@@ -219,34 +241,48 @@ const joinChatPut = asyncHandler(async function(req, res) {
         connectionIds.push({id: id});
     }
 
+    const notifyData = [];
+    for (let user of connectionIds) {
+        notifyData.push({
+            chatRoomId: roomId,
+            userId: user.id
+        });
+    };
+
     let chat = null;
+    let notification = null;
     try {
-        chat = await db.updateChat({
-            where: {
-                id: roomId
-            },
-            data: {
-                users: {
-                    connect: connectionIds
-                }
-            },
-            include: {
-                users: {
-                    select: {
-                        id: true,
-                        username: true,
-                        profileImgUrl: true
+        [chat, notification] = await Promise.all([
+            db.updateChat({
+                where: {
+                    id: roomId
+                },
+                data: {
+                    users: {
+                        connect: connectionIds
+                    }
+                },
+                include: {
+                    users: {
+                        select: {
+                            id: true,
+                            username: true,
+                            profileImgUrl: true
+                        }
                     }
                 }
-            }
-        });
+            }),
+            db.createManyNotifications({
+                data: notifyData
+            })
+        ]);
     } catch (error) {
         console.log(error);
         return res.status(500).json(
             {errors: [{msg: "Unable to add users"}]}
         );
     }
-    if (!chat) {
+    if (!chat || !notification) {
         return res.status(400).json(
             {errors: [{msg: "Unable to add users"}]}
         );
