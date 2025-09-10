@@ -23,6 +23,12 @@ async function findChatRoom(options) {
 };
 
 
+async function findManyChatRooms(options) {
+    const rooms = await prisma.chatRoom.findMany(options);
+    return rooms;
+}
+
+
 async function createMessage(options) {
     const message = await prisma.message.create(options);
     return message;
@@ -106,6 +112,7 @@ module.exports = {
     findUniqueUser,
     createUser,
     findChatRoom,
+    findManyChatRooms,
     createMessage,
     findChatMessages,
     editMessage,
