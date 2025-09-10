@@ -268,17 +268,30 @@ const getOrCreateChat = asyncHandler(async function(req, res, next) {
         req.user.id
     ];
 
-    let chat = null;
+    let chats = null;
     try {
-        chat = await db.findChatRoom({
+        chats = await db.findManyChatRooms({
             where: {
+                name: null,
                 users: {
-                    exactly: {
+                    every: {
                         id: {
-                            in: {
-                                ids
-                            }
+                            in: ids
                         }
+                    }
+                }
+            },
+            include: {
+                _count: {
+                    select: {
+                        users: true
+                    }
+                },
+                users: {
+                    select: {
+                        id: true,
+                        username: true,
+                        profileImgUrl: true
                     }
                 }
             }
@@ -289,9 +302,21 @@ const getOrCreateChat = asyncHandler(async function(req, res, next) {
             {errors: [{msg: "Unable to find chat"}]}
         );
     }
-    console.log(chat)
 
-    return res.json({errors: [{msg: "yes"}]});
+    let chatRoom = null;
+    for (let room of chats) {
+        const userCount = room._count.users;
+        if (userCount === ids.length) {
+            delete room._count;
+            chatRoom = room;
+            break;
+        }
+    }
+    if (!chatRoom) {
+        return next();
+    }
+
+    return res.json({chat: chatRoom, found: true});
 });
 
 
@@ -309,6 +334,7 @@ module.exports = {
     ],
     getOrCreateChat: [
         createChatVal,
-        getOrCreateChat
+        getOrCreateChat,
+        createChatPost
     ]
 };
