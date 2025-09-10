@@ -16,6 +16,14 @@ const userDataGet = asyncHandler(async function(req, res) {
                     id: req.user.id
                 },
                 include: {
+                    notifications: {
+                        where: {
+                            active: true,
+                            chatRoom: {
+                                name: null
+                            }
+                        }
+                    },
                     chatRooms: {
                         where: {
                             name: null
@@ -86,11 +94,12 @@ const userDataGet = asyncHandler(async function(req, res) {
                 friendShips: userData.friendShips,
                 friendRequests: userData.friendRequests,
                 sentRequests: userData.sentFriendRequests,
-                globalChat: globalChat
+                globalChat: globalChat,
+                notifications: userData.notifications
             }
         });
-
-    } catch {
+    } catch (error) {
+        console.log(error);
         return res.status(500).json(
             {errors: [{msg: "Unable to fetch user data"}]}
         );
