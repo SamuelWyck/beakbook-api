@@ -27,13 +27,13 @@ model User {
   password           String
   email              String          @unique
   profileImgUrl      String?
-  // chatRoomLinks  ChatRoomUser[]
   chatRooms          ChatRoom[]
   friends            UserFriend[]    @relation(name: "friend")
   friendShips        UserFriend[]    @relation(name: "friendship")
   friendRequests     FriendRequest[] @relation(name: "received")
   sentFriendRequests FriendRequest[] @relation(name: "sent")
   messages           Message[]
+  notifications      Notification[]
 }
 
 model UserFriend {
@@ -53,10 +53,11 @@ model FriendRequest {
 }
 
 model ChatRoom {
-  id       String    @id @default(uuid())
-  name     String?
-  users    User[]
-  messages Message[]
+  id               String         @id @default(uuid())
+  name             String?
+  users            User[]
+  messages         Message[]
+  userNoifications Notification[]
 }
 
 model Message {
@@ -69,10 +70,13 @@ model Message {
   timeStamp  DateTime @default(now())
 }
 
-// model ChatRoomUser {
-//   id         String   @id @default(uuid())
-//   chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
-//   chatRoomId String
-//   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   userId     String
-// }
+model Notification {
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+  chatRoomId String
+  active     Boolean  @default(true)
+
+  @@unique([userId, chatRoomId])
+}
