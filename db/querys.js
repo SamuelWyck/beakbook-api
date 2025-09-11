@@ -17,6 +17,12 @@ async function createUser(options) {
 };
 
 
+async function updateUser(options) {
+    const user = await prisma.user.update(options);
+    return user;
+};
+
+
 async function findChatRoom(options) {
     const chatRoom = await prisma.chatRoom.findFirst(options);
     return chatRoom;
@@ -139,6 +145,7 @@ async function updateManyNotifications(options) {
 module.exports = {
     findUniqueUser,
     createUser,
+    updateUser,
     findChatRoom,
     findManyChatRooms,
     createMessage,
