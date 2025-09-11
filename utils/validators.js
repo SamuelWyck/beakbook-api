@@ -1,5 +1,6 @@
 const {body, param} = require("express-validator");
 const db = require("../db/querys.js");
+const bcrypt = require("bcryptjs");
 
 
 
@@ -33,6 +34,32 @@ async function isUniqueUsername(username) {
 
 function passwordsMatch(confirmPwd, {req}) {
     return confirmPwd === req.body.password;
+};
+
+
+function newPwdsMatch(confirmPwd, {req}) {
+    return confirmPwd === req.body.newPassword;
+};
+
+
+async function isUserPassword(oldPassword, {req}) {
+    const user = await db.findUniqueUser({
+        where: {
+            id: req.user.id
+        }
+    });
+    if (!user) {
+        throw new Error("Cannot find user");
+    }
+
+    const match = await bcrypt.compare(
+        oldPassword, user.password
+    );
+    if (!match) {
+        throw new Error("Incorrect password");
+    }
+
+    return true;
 };
 
 
@@ -98,6 +125,18 @@ const addUserToChatVal = [
 ];
 
 
+const changePasswordVal = [
+    body("oldPassword")
+        .notEmpty().withMessage("Password required")
+        .custom(isUserPassword).withMessage("Incorrect password"),
+    body("newPassword")
+        .notEmpty().withMessage("New password required")
+        .isLength({min: 6}).withMessage("Min password length: 6"),
+    body("confirm")
+        .custom(newPwdsMatch).withMessage("Passwords do not match")
+];
+
+
 
 module.exports = {
     signupVal,
@@ -105,5 +144,6 @@ module.exports = {
     messageVal,
     friendRequestVal,
     createChatVal,
-    addUserToChatVal
+    addUserToChatVal,
+    changePasswordVal
 };
