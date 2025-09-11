@@ -27,6 +27,7 @@ model User {
   password           String
   email              String          @unique
   profileImgUrl      String?
+  profileImgAssetId  String?
   chatRooms          ChatRoom[]
   friends            UserFriend[]    @relation(name: "friend")
   friendShips        UserFriend[]    @relation(name: "friendship")
