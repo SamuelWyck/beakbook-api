@@ -1,6 +1,9 @@
 const asyncHandler = require("express-async-handler");
 const db = require("../db/querys.js");
 const upload = require("../utils/multer.js");
+const { validationResult } = require("express-validator");
+const {changePasswordVal} = require("../utils/validators.js");
+const bcrypt = require("bcryptjs");
 
 
 
@@ -148,11 +151,53 @@ const userProfileDataGet = asyncHandler(async function(req, res) {
 
 
 
+const changeUserPassword = asyncHandler(async function(req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({errors: errors.array()});
+    }
+
+    const userId = req.user.id;
+    const newPwdHash = await bcrypt.hash(
+        req.body.newPassword, 10
+    );
+
+    let user = null;
+    try {
+        user = await db.updateUser({
+            where: {
+                id: userId
+            },
+            data: {
+                password: newPwdHash
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to update password"}]}
+        );
+    }
+    if (!user) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to update password"}]}
+        );
+    }
+
+    return res.json({result: "success"});
+});
+
+
+
 module.exports = {
     userDataGet,
     userImageUpload: [
         upload.single("image"),
         userImageUpload
     ],
-    userProfileDataGet
+    userProfileDataGet,
+    changeUserPassword: [
+        changePasswordVal,
+        changeUserPassword
+    ]
 };
