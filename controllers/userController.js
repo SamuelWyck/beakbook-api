@@ -4,6 +4,8 @@ const upload = require("../utils/multer.js");
 const { validationResult } = require("express-validator");
 const {changePasswordVal} = require("../utils/validators.js");
 const bcrypt = require("bcryptjs");
+const cloudinary = require("../utils/cloudinary.js");
+const path = require("node:path");
 
 
 
@@ -113,9 +115,48 @@ const userDataGet = asyncHandler(async function(req, res) {
 
 
 const userImageUpload = asyncHandler(async function(req, res) {
-    console.log(res.file);
+    if (!req.file) {
+        return res.status(400).json(
+            {errors: [{msg: "Missing image file"}]}
+        );
+    }
 
-    return res.end();
+    const filePath = path.resolve(req.file.path);
+    const imageInfo = await cloudinary.uploadImage(filePath);
+    if (imageInfo.errors) {
+        return res.status(500).json({errors: imageInfo.errors});
+    }
+    
+    const userId = req.user.id;
+    let user = null;
+    try {
+        user = await db.updateUser({
+            where: {
+                id: userId
+            },
+            data: {
+                profileImgUrl: imageInfo.secure_url,
+                profileImgAssetId: imageInfo.asset_id
+            },
+            select: {
+                id: true,
+                profileImgUrl: true,
+                username: true
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to save image"}]}
+        );
+    }
+    if (!user) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to save image"}]}
+        );
+    }
+
+    return res.json({user});
 });
 
 
