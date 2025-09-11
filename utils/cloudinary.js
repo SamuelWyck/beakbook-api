@@ -1,5 +1,6 @@
 const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
+const fs = require("node:fs/promises");
 
 
 
@@ -8,3 +9,29 @@ cloudinary.config({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
+
+
+
+async function uploadImage(filePath) {
+    let res = null;
+    try {
+        res = await cloudinary.uploader.upload(
+            filePath, 
+            {
+                asset_folder: process.env.CLOUDINARY_UPLOAD_DIR
+            }
+        );
+    } catch (error) {
+        console.log(error);
+        return {errors: [{msg: "Error uploading image"}]};
+    }
+
+    await fs.unlink(filePath);
+    return res;
+};
+
+
+
+module.exports = {
+    uploadImage
+};
