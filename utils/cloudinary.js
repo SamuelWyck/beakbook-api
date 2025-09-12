@@ -32,6 +32,24 @@ async function uploadImage(filePath) {
 
 
 
+async function deleteImage(assetId) {
+    let res = null;
+    try {
+        res = await cloudinary.uploader.destroy(assetId);
+    } catch (error) {
+        console.log(error);
+        return {errors: [{msg: "Unable to delete image"}]};
+    }
+    if (res.result === "not found") {
+        return {errors: [{msg: "Unable to delete image"}]};
+    }
+
+    return res;
+};
+
+
+
 module.exports = {
-    uploadImage
+    uploadImage,
+    deleteImage
 };
