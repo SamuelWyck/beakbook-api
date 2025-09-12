@@ -121,22 +121,51 @@ const userImageUpload = asyncHandler(async function(req, res) {
         );
     }
 
+    const userId = req.user.id;
     const filePath = path.resolve(req.file.path);
-    const imageInfo = await cloudinary.uploadImage(filePath);
+
+    let user = null;
+    let imageInfo = null;
+    try {
+        [user, imageInfo] = await Promise.all([
+            db.findUniqueUser({
+                where: {
+                    id: userId
+                }
+            }),
+            cloudinary.uploadImage(filePath)
+        ]);
+    } catch (error) {
+        return res.status(500).json(
+            {errors: [{msg: "Unable to upload image"}]}
+        );
+    }
     if (imageInfo.errors) {
         return res.status(500).json({errors: imageInfo.errors});
     }
+
+
+    if (user.profileImgAssetId !== null) {
+        const result = await cloudinary.deleteImage(
+            user.profileImgAssetId
+        );
+        if (result.errors) {
+            return res.status(500).json(
+                {errors: result.errors}
+            );
+        }
+    }
+
     
-    const userId = req.user.id;
-    let user = null;
+    let updatedUser = null;
     try {
-        user = await db.updateUser({
+        updatedUser = await db.updateUser({
             where: {
                 id: userId
             },
             data: {
                 profileImgUrl: imageInfo.secure_url,
-                profileImgAssetId: imageInfo.asset_id
+                profileImgAssetId: imageInfo.public_id
             },
             select: {
                 id: true,
@@ -156,7 +185,7 @@ const userImageUpload = asyncHandler(async function(req, res) {
         );
     }
 
-    return res.json({user});
+    return res.json({user: updatedUser});
 });
 
 
@@ -230,6 +259,65 @@ const changeUserPassword = asyncHandler(async function(req, res) {
 
 
 
+const userImageDelete = asyncHandler(async function(req, res) {
+    const userId = req.user.id;
+
+    let user = null;
+    try {
+        user = await db.findUniqueUser({
+            where: {
+                id: userId
+            },
+            select: {
+                profileImgAssetId: true
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to find user"}]}
+        );
+    }
+    if (!user || !user.profileImgAssetId) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to find user"}]}
+        );
+    }
+    const result = await cloudinary.deleteImage(
+        user.profileImgAssetId
+    );
+    if (result.errors) {
+        return res.status(500).json({errors: result.errors});
+    }
+
+    let updatedUser = null;
+    try {
+        updatedUser = await db.updateUser({
+            where: {
+                id: userId
+            },
+            data: {
+                profileImgUrl: null,
+                profileImgAssetId: null
+            },
+            select: {
+                id: true,
+                profileImgUrl: true,
+                username: true
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to update user"}]}
+        );
+    }
+
+    return res.json({user: updatedUser});
+});
+
+
+
 module.exports = {
     userDataGet,
     userImageUpload: [
@@ -240,5 +328,6 @@ module.exports = {
     changeUserPassword: [
         changePasswordVal,
         changeUserPassword
-    ]
+    ],
+    userImageDelete
 };
