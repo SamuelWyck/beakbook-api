@@ -37,8 +37,7 @@ app.use(
         cookie: {
             maxAge: 7 * 24 * 60 * 60 * 1000, //one week
             sameSite: "none",
-            secure: true,
-            domain: process.env.FRONT_END_DOMAIN
+            secure: true
         },
         secret: process.env.SESSION_SECRET,
         resave: true,
