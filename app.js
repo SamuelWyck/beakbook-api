@@ -35,7 +35,8 @@ app.use(
     expressSession({
         cookie: {
             maxAge: 7 * 24 * 60 * 60 * 1000, //one week
-            sameSite: "none"
+            sameSite: "none",
+            secure: true
         },
         secret: process.env.SESSION_SECRET,
         resave: true,
