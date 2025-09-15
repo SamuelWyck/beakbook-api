@@ -38,7 +38,8 @@ const signupPost = asyncHandler(async function(req, res, next) {
                 }
             }
         });
-    } catch {
+    } catch (error) {
+        console.log(error);
         throw new Error("Unable to create user");
     }
 
